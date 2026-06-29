@@ -2,9 +2,9 @@ import { ImageCombiner } from "@/components/image-combiner"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Img Gen Playground",
+  title: "AI 图像生成工坊",
   description:
-    "Generate images from text prompts or edit existing images with AI. Img Gen Playground uses Google Gemini models, supports 5 aspect ratios, offers Pro (best quality) and Classic (2x faster) modes. Free, no watermarks, no sign-up required to try.",
+    "通过文本提示词生成图像，或使用 AI 编辑已有图片。支持多种模型与宽高比，免费、无水印、无需注册即可试用。",
 }
 
 export default function Home() {

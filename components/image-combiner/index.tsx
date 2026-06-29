@@ -11,13 +11,13 @@ import { useImageActions } from "./hooks/use-image-actions"
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts"
 import { useDragDrop } from "./hooks/use-drag-drop"
 import { usePasteHandler } from "./hooks/use-paste-handler"
-import { useResizablePanels } from "./hooks/use-resizable-panels"
 import { usePersistentHistory } from "./hooks/use-persistent-history"
-import { InputSection } from "./input-section"
+import { PromptComposer } from "./prompt-composer"
 import { OutputSection } from "./output-section"
 import { ToastNotification } from "./toast-notification"
-import { GenerationHistory } from "./generation-history"
+import { HistorySidebar } from "./history-sidebar"
 import { GlobalDropZone } from "./global-drop-zone"
+import { Menu } from "lucide-react"
 import type { ModelType, ThinkingLevel, Resolution, Quality } from "./types"
 import { DEFAULT_MODEL_ID } from "./model-catalog"
 import { useDraftState, getSavedDraft, clearDraft } from "./hooks/use-draft-state"
@@ -50,7 +50,7 @@ export function ImageCombiner(): ReactElement {
   const draftRef = useRef<ReturnType<typeof getSavedDraft>>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null)
   const [showHowItWorks, setShowHowItWorks] = useState(false)
-  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
 
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -205,9 +205,6 @@ export function ImageCombiner(): ReactElement {
     onToast: showToast,
   })
 
-  // Resizable Panels
-  const { leftWidth, hasResized, containerRef, handleMouseDown, handleDoubleClick } = useResizablePanels()
-
   // Drag & Drop
   const { isDraggingOver, dropZoneHover, setDropZoneHover, handleGlobalDrop } = useDragDrop({
     onImageUpload: handleImageUpload,
@@ -297,7 +294,7 @@ export function ImageCombiner(): ReactElement {
   )
 
   return (
-    <div className="bg-background h-dvh overflow-hidden flex flex-col select-none font-[family-name:var(--font-geist-pixel)] overscroll-none touch-pan-x touch-pan-y">
+    <div className="bg-background h-dvh overflow-hidden flex flex-col select-none font-sans overscroll-none touch-pan-x touch-pan-y">
       {/* JSON-LD structured data is in layout.tsx - single source of truth for SEO */}
 
       {toast && <ToastNotification message={toast.message} type={toast.type} />}
@@ -323,166 +320,135 @@ export function ImageCombiner(): ReactElement {
         />
       </div>
 
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col items-center p-2 md:p-6 lg:p-8">
-        <div className="w-full flex-1 min-h-0 flex flex-col">
-          <div className="w-full mx-auto select-none flex-1 min-h-0 flex flex-col">
-            <div className="bg-black/90 border-0 px-2 py-2 md:px-2 md:py-2 lg:px-2 lg:py-2 flex flex-col flex-1 min-h-0 rounded-[10px]">
-              <div className="flex items-start justify-between gap-4 mb-2 md:mb-3 flex-shrink-0">
-                <div className="flex flex-col items-start">
-                  <h1 className="text-lg md:text-2xl font-bold text-white select-none leading-none">
-                    <span className="text-gray-400">v0</span> Img Gen Playground
-                  </h1>
-                  <p className="text-[9px] md:text-[10px] text-gray-400 select-none tracking-wide mt-0.5 md:mt-1">
-                    Powered by{" "}
-                    <a
-                      href="https://vercel.com/ai-gateway"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-gray-300 transition-colors"
-                    >
-                      AI Gateway
-                    </a>
-                  </p>
-                </div>
-              </div>
+      <div className="relative z-10 flex-1 min-h-0 flex">
+        {/* Left Sidebar — Conversation History (desktop) */}
+        <aside className="hidden lg:flex lg:flex-col w-72 flex-shrink-0 border-r border-white/10">
+          <HistorySidebar
+            generations={persistedGenerations}
+            selectedId={selectedGenerationId}
+            onSelect={setSelectedGenerationId}
+            onCancel={cancelGeneration}
+            onDelete={deleteGeneration}
+            onNewChat={clearAll}
+            isLoading={historyLoading}
+            hasInitiallyLoaded={hasInitiallyLoaded}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            isLoadingMore={isLoadingMore}
+          />
+        </aside>
 
-              <div className="flex flex-col gap-4 xl:gap-0 flex-1 min-h-0">
-                <div
-                  ref={containerRef}
-                  className="flex flex-col xl:flex-row gap-4 xl:gap-0 flex-1 min-h-0"
-                >
-                  <div
-                    className="flex flex-col xl:w-[35%] xl:min-w-0 xl:pl-2 xl:pr-2 xl:border-r xl:border-white/10 xl:pt-2 min-h-0"
-                    style={hasResized ? { width: `${leftWidth}%` } : undefined}
-                  >
-                    <InputSection
-                      prompt={prompt}
-                      setPrompt={setPrompt}
-                      aspectRatio={aspectRatio}
-                      setAspectRatio={setAspectRatio}
-                      availableAspectRatios={availableAspectRatios}
-                      useUrls={useUrls}
-                      setUseUrls={setUseUrls}
-                      image1Preview={image1Preview}
-                      image2Preview={image2Preview}
-                      image1={image1}
-                      image1Url={image1Url}
-                      image2Url={image2Url}
-                      canGenerate={canGenerate}
-                      hasImages={hasImages}
-                      onGenerate={runGeneration}
-                      onToast={showToast}
-                      onClearAll={clearAll}
-                      onImageUpload={handleImageUpload}
-                      onUrlChange={handleUrlChange}
-                      onClearImage={clearImage}
-                      onKeyDown={handleKeyDown}
-                      onPromptPaste={handlePromptPaste}
-                      onImageFullscreen={(url) => openFullscreen(url)}
-                      promptTextareaRef={promptTextareaRef}
-                      selectedModel={selectedModel}
-                      setSelectedModel={setSelectedModel}
-                      thinkingLevel={thinkingLevel}
-                      setThinkingLevel={setThinkingLevel}
-                      resolution={resolution}
-                      setResolution={setResolution}
-                      quality={quality}
-                      setQuality={setQuality}
-                      useGrounding={useGrounding}
-                      setUseGrounding={setUseGrounding}
-                    />
+        {/* Mobile Sidebar — Drawer */}
+        {showHistory && (
+          <div className="lg:hidden fixed inset-0 z-50 flex">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
+            <aside className="relative w-72 max-w-[80vw] h-full border-r border-white/10 animate-in slide-in-from-left duration-200">
+              <HistorySidebar
+                generations={persistedGenerations}
+                selectedId={selectedGenerationId}
+                onSelect={setSelectedGenerationId}
+                onCancel={cancelGeneration}
+                onDelete={deleteGeneration}
+                onNewChat={clearAll}
+                isLoading={historyLoading}
+                hasInitiallyLoaded={hasInitiallyLoaded}
+                hasMore={hasMore}
+                onLoadMore={loadMore}
+                isLoadingMore={isLoadingMore}
+                onCloseMobile={() => setShowHistory(false)}
+              />
+            </aside>
+          </div>
+        )}
 
-                    {/* Desktop History */}
-                    <div className="hidden xl:flex xl:flex-col pt-3 flex-1 min-h-0">
-                      <GenerationHistory
-                        generations={persistedGenerations}
-                        selectedId={selectedGenerationId}
-                        onSelect={setSelectedGenerationId}
-                        onCancel={cancelGeneration}
-                        onDelete={deleteGeneration}
-                        isLoading={historyLoading}
-                        hasInitiallyLoaded={hasInitiallyLoaded}
-                        hasMore={hasMore}
-                        onLoadMore={loadMore}
-                        isLoadingMore={isLoadingMore}
-                      />
-                    </div>
-                  </div>
+        {/* Right Main — Canvas + Composer */}
+        <main className="flex-1 min-w-0 flex flex-col">
+          {/* Top bar */}
+          <header className="flex items-center justify-between gap-3 px-3 md:px-6 py-3 border-b border-white/10 flex-shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={() => setShowHistory(true)}
+                aria-label="打开历史对话"
+                className="lg:hidden p-2 rounded-md text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <h2 className="text-sm md:text-base font-semibold text-white truncate">
+                {currentMode === "image-editing" ? "图像编辑" : "文生图"}
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="text-xs text-white/50 hover:text-white transition-colors flex-shrink-0"
+            >
+              使用说明
+            </button>
+          </header>
 
-                  <div
-                    className="hidden xl:flex items-center justify-center cursor-col-resize hover:bg-white/10 transition-colors relative group"
-                    style={{ width: "8px", flexShrink: 0 }}
-                    onMouseDown={handleMouseDown}
-                    onDoubleClick={handleDoubleClick}
-                  >
-                    <div className="w-0.5 h-8 bg-white/20 group-hover:bg-white/40 transition-colors rounded-full" />
-                  </div>
-
-                  <div
-                    className="flex flex-col xl:w-[calc(65%-8px)] xl:pl-1 xl:pr-0 flex-1 min-h-0"
-                    style={hasResized ? { width: `${100 - leftWidth}%` } : undefined}
-                  >
-                    <OutputSection
-                      selectedGeneration={selectedGeneration}
-                      generations={persistedGenerations}
-                      selectedGenerationId={selectedGenerationId}
-                      setSelectedGenerationId={setSelectedGenerationId}
-                      imageLoaded={imageLoaded}
-                      setImageLoaded={setImageLoaded}
-                      onCancelGeneration={cancelGeneration}
-                      onDeleteGeneration={deleteGeneration}
-                      onOpenFullscreen={() => generatedImage && openFullscreen(generatedImage.url)}
-                      onLoadAsInput={loadGeneratedAsInput}
-                      onCopy={() => copyImageToClipboard(generatedImage)}
-                      onDownload={() => downloadImage(generatedImage)}
-                      onOpenInNewTab={() => openImageInNewTab(generatedImage)}
-                      onImageReady={markGenerationComplete}
-                    />
-                  </div>
-                </div>
-
-                {/* Mobile History - After both sections */}
-                <div className="xl:hidden flex-shrink-0 max-h-[18vh] flex flex-col overflow-hidden">
-                  <GenerationHistory
-                    generations={persistedGenerations}
-                    selectedId={selectedGenerationId}
-                    onSelect={setSelectedGenerationId}
-                    onCancel={cancelGeneration}
-                    onDelete={deleteGeneration}
-                    isLoading={historyLoading}
-                    hasMore={hasMore}
-                    onLoadMore={loadMore}
-                    isLoadingMore={isLoadingMore}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 md:mt-4 border-t border-white/10 pt-3 pb-1 md:pt-4 md:pb-2 w-full flex items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-white/60 flex-shrink-0">
-                <a
-                  href="https://v0.app/templates/nano-banana-playground-template-hO33zwNmsQF"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white/80 transition-colors"
-                >
-                  Clone this app
-                </a>
-                <span className="text-white/20">•</span>
-                <button onClick={() => setShowHowItWorks(true)} className="hover:text-white/80 transition-colors">
-                  How it works
-                </button>
-                <span className="text-white/20">•</span>
-                <a
-                  href="https://x.com/estebansuarez"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white/80 transition-colors"
-                >
-                  @estebansuarez
-                </a>
-              </div>
+          {/* Canvas */}
+          <div className="flex-1 min-h-0 flex items-center justify-center p-3 md:p-6">
+            <div className="w-full h-full max-w-3xl">
+              <OutputSection
+                selectedGeneration={selectedGeneration}
+                generations={persistedGenerations}
+                selectedGenerationId={selectedGenerationId}
+                setSelectedGenerationId={setSelectedGenerationId}
+                imageLoaded={imageLoaded}
+                setImageLoaded={setImageLoaded}
+                onCancelGeneration={cancelGeneration}
+                onDeleteGeneration={deleteGeneration}
+                onOpenFullscreen={() => generatedImage && openFullscreen(generatedImage.url)}
+                onLoadAsInput={loadGeneratedAsInput}
+                onCopy={() => copyImageToClipboard(generatedImage)}
+                onDownload={() => downloadImage(generatedImage)}
+                onOpenInNewTab={() => openImageInNewTab(generatedImage)}
+                onImageReady={markGenerationComplete}
+              />
             </div>
           </div>
-        </div>
+
+          {/* Bottom Composer */}
+          <div className="flex-shrink-0 px-3 md:px-6 pb-4 md:pb-6 pt-1">
+            <div className="w-full max-w-3xl mx-auto">
+              <PromptComposer
+                prompt={prompt}
+                setPrompt={setPrompt}
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
+                availableAspectRatios={availableAspectRatios}
+                useUrls={useUrls}
+                setUseUrls={setUseUrls}
+                image1Preview={image1Preview}
+                image2Preview={image2Preview}
+                image1Url={image1Url}
+                image2Url={image2Url}
+                canGenerate={canGenerate}
+                isLoading={isLoading}
+                onGenerate={runGeneration}
+                onImageUpload={handleImageUpload}
+                onUrlChange={handleUrlChange}
+                onClearImage={clearImage}
+                onKeyDown={handleKeyDown}
+                onPromptPaste={handlePromptPaste}
+                onImageFullscreen={(url) => openFullscreen(url)}
+                promptTextareaRef={promptTextareaRef}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                thinkingLevel={thinkingLevel}
+                setThinkingLevel={setThinkingLevel}
+                resolution={resolution}
+                setResolution={setResolution}
+                quality={quality}
+                setQuality={setQuality}
+                useGrounding={useGrounding}
+                setUseGrounding={setUseGrounding}
+              />
+              <p className="mt-2 text-center text-[11px] text-white/30">
+                按 Enter 生成，Shift + Enter 换行
+              </p>
+            </div>
+          </div>
+        </main>
       </div>
 
       {/* Lazy-loaded modals - only loaded when opened */}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { createClient } from "@/lib/supabase/client"
 import {
   getAnonymousGenerations,
   saveAnonymousGeneration,
@@ -33,6 +34,31 @@ export function usePersistentHistory(_onToast?: (message: string, type: "success
     // Persist only finished generations (skip transient loading rows).
     if (generation.status !== "loading") {
       saveAnonymousGeneration(generation)
+      
+      // Also try to save to database if user is logged in
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      
+      if (user && generation.imageUrl) {
+        try {
+          const { error } = await supabase
+            .from('generation_history')
+            .insert({
+              user_id: user.id,
+              prompt: generation.prompt,
+              model: (generation as any).model || 'unknown',
+              image_urls: [generation.imageUrl],
+            })
+          
+          if (error) {
+            console.error('Failed to save generation to database:', error)
+          }
+        } catch (err) {
+          console.error('Error saving generation:', err)
+        }
+      }
     }
   }, [])
 

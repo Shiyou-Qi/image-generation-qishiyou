@@ -29,7 +29,7 @@ type AspectRatio = string
 const HowItWorksModal = lazy(() => import("./how-it-works-modal").then((mod) => ({ default: mod.HowItWorksModal })))
 const FullscreenViewer = lazy(() => import("./fullscreen-viewer").then((mod) => ({ default: mod.FullscreenViewer })))
 
-export function ImageCombiner(): ReactElement {
+export function ImageCombiner({ user }: { user: any }): ReactElement {
   const isMobile = useIsMobile()
   const router = useRouter()
 

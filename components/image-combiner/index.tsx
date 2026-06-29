@@ -45,12 +45,21 @@ export function ImageCombiner(): ReactElement {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null)
   const [showHowItWorks, setShowHowItWorks] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
+  }, [])
+
+  const handleUserClick = useCallback(() => {
+    showToast("用户功能开发中...", "success")
+  }, [showToast])
+
+  const handleCollapseSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => !prev)
   }, [])
 
   // Aspect Ratio
@@ -324,6 +333,8 @@ export function ImageCombiner(): ReactElement {
             hasMore={hasMore}
             onLoadMore={loadMore}
             isLoadingMore={isLoadingMore}
+            onUserClick={handleUserClick}
+            onCollapse={handleCollapseSidebar}
           />
         </aside>
 
@@ -345,6 +356,8 @@ export function ImageCombiner(): ReactElement {
                 onLoadMore={loadMore}
                 isLoadingMore={isLoadingMore}
                 onCloseMobile={() => setShowHistory(false)}
+                onUserClick={handleUserClick}
+                onCollapse={handleCollapseSidebar}
               />
             </aside>
           </div>

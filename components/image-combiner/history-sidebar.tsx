@@ -20,6 +20,9 @@ interface HistorySidebarProps {
   onLoadMore?: () => void
   isLoadingMore?: boolean
   onCloseMobile?: () => void
+  onUserClick?: () => void
+  onCollapse?: () => void
+  isCollapsed?: boolean
 }
 
 function formatTime(ts: number): string {
@@ -156,6 +159,8 @@ export const HistorySidebar = memo(function HistorySidebar({
   onLoadMore,
   isLoadingMore = false,
   onCloseMobile,
+  onUserClick,
+  onCollapse,
 }: HistorySidebarProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -211,6 +216,7 @@ export const HistorySidebar = memo(function HistorySidebar({
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* User profile button */}
           <button
+            onClick={onUserClick}
             aria-label="用户账户"
             title="用户账户"
             className="p-2 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
@@ -219,6 +225,7 @@ export const HistorySidebar = memo(function HistorySidebar({
           </button>
           {/* Collapse button - desktop only */}
           <button
+            onClick={onCollapse}
             aria-label="折叠侧栏"
             title="折叠侧栏"
             className="hidden lg:flex p-2 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"

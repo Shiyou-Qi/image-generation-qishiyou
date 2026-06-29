@@ -244,7 +244,7 @@ export const PromptComposer = memo(function PromptComposer({
                 disabled={bothFilled}
                 aria-label="上传图片"
                 title="上传图片"
-                className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white hover:border-white/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-white/80 hover:text-white hover:border-white/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
               >
                 <ImagePlus className="w-4 h-4" />
                 <span className="text-xs hidden sm:inline">图片</span>
@@ -260,7 +260,7 @@ export const PromptComposer = memo(function PromptComposer({
             aria-label="切换图片来源"
             title={useUrls ? "使用本地文件" : "使用图片链接"}
             className={cn(
-              "flex items-center gap-1.5 h-9 px-3 rounded-lg border transition-colors flex-shrink-0 text-xs",
+              "flex items-center gap-1.5 h-9 px-3 rounded-full border transition-colors flex-shrink-0 text-xs",
               useUrls
                 ? "bg-white text-black border-white"
                 : "bg-white/5 border-white/10 text-white/80 hover:text-white hover:border-white/30",

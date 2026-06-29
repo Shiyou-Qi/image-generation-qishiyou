@@ -114,7 +114,7 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
         aria-label="Select model"
         aria-expanded={open}
         className={cn(
-          "flex items-center gap-1.5 h-7 md:h-10 px-2 md:px-3 bg-black/50 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 transition-all max-w-[140px] md:max-w-[220px]",
+          "flex items-center gap-1.5 h-7 md:h-10 px-2 md:px-3 rounded-full bg-black/50 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 transition-all max-w-[140px] md:max-w-[220px]",
           open && "border-gray-400 text-white",
         )}
       >

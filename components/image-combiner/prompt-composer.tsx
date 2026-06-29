@@ -276,7 +276,7 @@ export const PromptComposer = memo(function PromptComposer({
           <Select value={aspectRatio} onValueChange={setAspectRatio}>
             <SelectTrigger
               aria-label="选择宽高比"
-              className="w-[80px] md:w-[110px] !h-9 px-2 md:px-3 !py-0 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 flex-shrink-0"
+              className="w-[80px] md:w-[110px] !h-9 px-2 md:px-3 !py-0 rounded-full bg-white/5 border border-white/10 text-white text-xs focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 flex-shrink-0"
             >
               <SelectValue placeholder="1:1" />
             </SelectTrigger>

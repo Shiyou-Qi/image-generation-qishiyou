@@ -104,14 +104,7 @@
     background-color: #000000 !important;
   }
   
-  /* Optimize background shader rendering with containment and hardware acceleration */
-  .shader-background {
-    contain: layout style paint;
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
+
   
   /* Enhanced smooth transitions for auth state changes */
   .smooth-transition {

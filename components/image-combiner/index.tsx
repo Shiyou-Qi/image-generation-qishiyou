@@ -1,8 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation"
-import dynamic from "next/dynamic"
 import type { ReactElement } from "react"
-import { useState, useEffect, useRef, useCallback, memo, lazy, Suspense } from "react"
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useImageUpload } from "./hooks/use-image-upload"
 import { useImageGeneration } from "./hooks/use-image-generation"
@@ -24,12 +23,7 @@ import { useDraftState, getSavedDraft, clearDraft } from "./hooks/use-draft-stat
 
 type AspectRatio = string
 
-// Dithering shader — imported directly for instant render (no lazy flash)
-const Dithering = dynamic(
-  () => import("@paper-design/shaders-react").then((mod) => ({ default: mod.Dithering })),
-  { ssr: false, loading: () => <div className="w-full h-full bg-black" /> }
-)
-const MemoizedDithering = memo(Dithering)
+
 
 // Modals are only shown on user interaction - no need to load them upfront
 const HowItWorksModal = lazy(() => import("./how-it-works-modal").then((mod) => ({ default: mod.HowItWorksModal })))
@@ -303,22 +297,17 @@ export function ImageCombiner(): ReactElement {
         <GlobalDropZone dropZoneHover={dropZoneHover} onSetDropZoneHover={setDropZoneHover} onDrop={handleGlobalDrop} />
       )}
 
-      <div className="fixed inset-0 z-0 select-none shader-background bg-black">
-        <MemoizedDithering
-          colorBack="#00000000"
-          colorFront="#FFFFFF"
-          speed={0.43}
-          shape="wave"
-          type="4x4"
-          pxSize={3}
-          scale={0.6}
-          style={{
-            backgroundColor: "#000000",
-            height: "100vh",
-            width: "100vw",
-          }}
-        />
-      </div>
+      {/* Grid Background */}
+      <div
+        className="fixed inset-0 z-0 select-none bg-black"
+        style={{
+          backgroundImage: `
+            linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0.05) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0.05) 76%, transparent 77%, transparent)
+          `,
+          backgroundSize: "50px 50px",
+        }}
+      />
 
       <div className="relative z-10 flex-1 min-h-0 flex">
         {/* Left Sidebar — Conversation History (desktop) */}

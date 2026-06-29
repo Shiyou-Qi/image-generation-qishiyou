@@ -5,7 +5,7 @@ import { memo, useState, useCallback, useRef, useEffect } from "react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { Generation } from "./types"
-import { Loader2, Plus, ImageIcon, Trash2, X } from "lucide-react"
+import { Loader2, Plus, ImageIcon, Trash2, X, ChevronLeft, User } from "lucide-react"
 
 interface HistorySidebarProps {
   generations: Generation[]
@@ -125,7 +125,7 @@ const HistoryRow = memo(function HistoryRow({
             e.stopPropagation()
             onCancel(gen.id)
           }}
-          className="flex-shrink-0 text-[11px] px-2 py-1 rounded-md bg-white/10 hover:bg-white hover:text-black text-white/80 transition-colors"
+          className="flex-shrink-0 text-[11px] px-2 py-1 rounded-full bg-white/10 hover:bg-white hover:text-black text-white/80 transition-colors"
         >
           取消
         </button>
@@ -134,7 +134,7 @@ const HistoryRow = memo(function HistoryRow({
           onClick={(e) => onDeleteClick(e, gen.id)}
           disabled={deletingId === gen.id}
           aria-label="删除对话"
-          className="flex-shrink-0 p-1.5 rounded-md text-white/40 opacity-0 group-hover:opacity-100 hover:bg-white/10 hover:text-white transition-all"
+          className="flex-shrink-0 p-1.5 rounded-full text-white/40 opacity-0 group-hover:opacity-100 hover:bg-white/10 hover:text-white transition-all"
         >
           {deletingId === gen.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
         </button>
@@ -201,34 +201,52 @@ export const HistorySidebar = memo(function HistorySidebar({
 
   return (
     <div className="flex flex-col h-full min-h-0 bg-black/60">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 flex-shrink-0">
-        <div className="flex flex-col">
-          <h1 className="text-base font-bold text-white leading-none">
+      {/* Top bar: Branding + User + Controls */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <h1 className="text-sm font-bold text-white leading-none whitespace-nowrap">
             <span className="text-white/40">v0</span> 图像生成
           </h1>
-          <p className="text-[10px] text-white/40 mt-1">由 AI Gateway 驱动</p>
         </div>
-        {onCloseMobile && (
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* User profile button */}
           <button
-            onClick={onCloseMobile}
-            aria-label="关闭"
-            className="lg:hidden p-1.5 rounded-md text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            aria-label="用户账户"
+            title="用户账户"
+            className="p-2 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
           >
-            <X className="w-5 h-5" />
+            <User className="w-4 h-4" />
           </button>
-        )}
+          {/* Collapse button - desktop only */}
+          <button
+            aria-label="折叠侧栏"
+            title="折叠侧栏"
+            className="hidden lg:flex p-2 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          {/* Close button - mobile only */}
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              aria-label="关闭侧栏"
+              className="lg:hidden p-2 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* New chat */}
       <div className="px-3 pb-3 flex-shrink-0">
-        <button
-          onClick={() => {
-            onNewChat()
-            onCloseMobile?.()
-          }}
-          className="flex items-center justify-center gap-2 w-full h-10 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
-        >
+              <button
+                onClick={() => {
+                  onNewChat()
+                  onCloseMobile?.()
+                }}
+                className="flex items-center justify-center gap-2 w-full h-10 rounded-full bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
+              >
           <Plus className="w-4 h-4" />
           新建对话
         </button>

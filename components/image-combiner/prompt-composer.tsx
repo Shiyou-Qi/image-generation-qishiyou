@@ -167,9 +167,9 @@ export const PromptComposer = memo(function PromptComposer({
             />
             {image1Url && (
               <button
-                onClick={() => onClearImage(1)}
-                aria-label="清除第一张图片链接"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                onClick={() => onClearImage(2)}
+                aria-label="移除第二张图片"
+                className="absolute top-1 right-1 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 hover:bg-black/80 text-white/60 hover:text-white transition-all"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -299,7 +299,7 @@ export const PromptComposer = memo(function PromptComposer({
                 <button
                   aria-label="高级设置"
                   title="高级设置"
-                  className="flex items-center justify-center h-9 w-9 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white hover:border-white/30 transition-colors flex-shrink-0"
+                  className="flex items-center justify-center h-9 w-9 rounded-full bg-white/5 border border-white/10 text-white/80 hover:text-white hover:border-white/30 transition-colors flex-shrink-0"
                 >
                   <Settings2 className="w-4 h-4" />
                 </button>
@@ -397,7 +397,7 @@ export const PromptComposer = memo(function PromptComposer({
           onClick={onGenerate}
           disabled={!canGenerate || isLoading}
           aria-label="生成图像"
-          className="flex items-center justify-center h-9 w-9 rounded-lg bg-white text-black hover:bg-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+          className="flex items-center justify-center h-9 w-9 rounded-full bg-white text-black hover:bg-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
         >
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
         </button>
